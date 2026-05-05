@@ -6,7 +6,7 @@ use anyhow::Result;
 use clap::Parser;
 use std::fs;
 use std::path::PathBuf;
-use vtt_transcript_cleaner::{clean_transcript, parse_vtt, llama_cleanup};
+use vtt_transcript_cleaner::{clean_transcript, normalize_transcript, parse_vtt, llama_cleanup};
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -40,8 +40,13 @@ struct Args {
     llama_url: Option<String>,
 
     /// System prompt for llama.cpp cleanup
-    #[arg(long, default_value = "Clean up the following transcript text by fixing grammar, removing duplicates, and making it more readable. Preserve the original meaning and speaker attributions.")]
+    #[arg(long, default_value = "You are post-processing a transcript that has already been structurally cleaned. The text is split into paragraphs — each paragraph is one speaker turn. Your tasks: (1) Remove or rewrite bracketed sound effects like [snorts], [laughter], [clears throat] — drop them unless they add meaning. (2) If a speaker's name is clearly established by context, replace unnamed paragraph breaks with 'Name: ' attribution. (3) Fix sentence flow where a sentence is split across a paragraph boundary. (4) Lightly correct grammar and word choice where the meaning is clear. Do NOT add, invent, or summarize content. Preserve all technical terms, proper nouns, and numbers exactly.")]
     llama_prompt: String,
+
+    /// Normalize text: strip filler words (um/uh), remove consecutive duplicate
+    /// words caused by rolling-caption carry-over, and capitalize entries
+    #[arg(short = 'n', long)]
+    normalize: bool,
 
     /// Disable colored output
     #[arg(long)]
@@ -74,6 +79,11 @@ async fn main() -> Result<()> {
         args.merge_lines,
         args.deduplicate,
     );
+
+    // Apply rule-based normalization if requested
+    if args.normalize {
+        transcript = normalize_transcript(transcript);
+    }
 
     // Apply llama.cpp cleanup if requested
     if let Some(llama_url) = &args.llama_url {

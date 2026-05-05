@@ -36,9 +36,12 @@ impl TranscriptOutput {
                 output.push_str("] ");
             }
 
+            // Named speaker only — empty string means unnamed speaker change, no label.
             if let Some(speaker) = &entry.speaker {
-                output.push_str(speaker);
-                output.push_str(": ");
+                if !speaker.is_empty() {
+                    output.push_str(speaker);
+                    output.push_str(": ");
+                }
             }
             output.push_str(&entry.text);
             output.push_str("\n\n");
@@ -58,7 +61,9 @@ impl TranscriptOutput {
             }
 
             if let Some(speaker) = &entry.speaker {
-                line.push_str(&format!("{} ", format!("{}:", speaker).cyan().bold()));
+                if !speaker.is_empty() {
+                    line.push_str(&format!("{} ", format!("{}:", speaker).cyan().bold()));
+                }
             }
             line.push_str(&entry.text);
 
@@ -100,9 +105,11 @@ impl TranscriptOutput {
             }
 
             if let Some(speaker) = &entry.speaker {
-                output.push_str("**");
-                output.push_str(speaker);
-                output.push_str("**: ");
+                if !speaker.is_empty() {
+                    output.push_str("**");
+                    output.push_str(speaker);
+                    output.push_str("**: ");
+                }
             }
             output.push_str(&entry.text);
             output.push_str("\n\n");

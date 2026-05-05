@@ -57,3 +57,9 @@ cargo run -- -i examples/00sample.vtt -d -m -o output.txt
 
 # Force no colors even for terminal
 cargo run -- -i examples/00sample.vtt -d -m --no-color
+
+
+cargo run --release -- \
+    -i examples/Dan_Guido_-_200_Bugs_Week_Engineer__How_We_Rebuilt_Trail_of_Bits_Around_AI____un_prompted_2026__kgwvAyF7qsA_transcript.en.vtt \
+    --merge-lines --deduplicate --normalize \
+    --llama-url http://localhost:4444

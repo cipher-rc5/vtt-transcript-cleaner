@@ -4,10 +4,12 @@
 
 pub mod cleaner;
 pub mod llama;
+pub mod normalizer;
 pub mod output;
 pub mod parser;
 
 pub use cleaner::clean_transcript;
 pub use llama::llama_cleanup;
+pub use normalizer::normalize_transcript;
 pub use output::TranscriptOutput;
 pub use parser::{parse_vtt, VttEntry};
