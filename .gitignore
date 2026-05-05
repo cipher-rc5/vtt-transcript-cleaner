@@ -1,0 +1,58 @@
+# ── Rust build artifacts ──────────────────────────────────────────────────────
+/target/
+**/*.rs.bk
+
+# Cargo lock — keep for binaries, omit for libraries.
+# This is a binary crate, so Cargo.lock is intentionally committed.
+# Cargo.lock
+
+# ── Secrets & credentials ─────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+secrets/
+config/local.*
+
+# ── LLM / model files ─────────────────────────────────────────────────────────
+*.gguf
+*.ggml
+*.bin
+*.pt
+*.safetensors
+models/
+
+# ── Test & benchmark output ───────────────────────────────────────────────────
+/tests/output/
+/tests/fixtures/generated/
+criterion/
+*.profraw
+*.profdata
+lcov.info
+tarpaulin-report.html
+tarpaulin-report.json
+
+# ── macOS ─────────────────────────────────────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# ── Editor & IDE ──────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.iml
+*.suo
+*.user
+*.swp
+*~
+.#*
+\#*#
+
+# ── Dev scratch space ─────────────────────────────────────────────────────────
+_dev/
+scratch/
+tmp/
