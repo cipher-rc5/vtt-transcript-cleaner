@@ -17,8 +17,10 @@ struct ChatRequest {
     messages: Vec<ChatMessage>,
     temperature: f32,
     top_p: f32,
-    /// -1 = no limit; the model stops at its natural EOS token.
-    max_tokens: i32,
+    /// Omitting max_tokens lets the server use its configured default.
+    /// Most local servers default to their full context window.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    max_tokens: Option<i32>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -69,8 +71,6 @@ async fn chat_completion(
             },
             ChatMessage {
                 role: "user".to_string(),
-                // Delimiters help instruction-tuned models output only the
-                // cleaned transcript and skip any preamble or commentary.
                 content: format!(
                     "[TRANSCRIPT]\n{}\n[END TRANSCRIPT]\n\nOutput only the cleaned transcript.",
                     input_text
@@ -79,7 +79,7 @@ async fn chat_completion(
         ],
         temperature: 0.3,
         top_p: 0.9,
-        max_tokens: -1,
+        max_tokens: None, // let the server use its default context window
     };
 
     let url = format!("{}/v1/chat/completions", llama_url.trim_end_matches('/'));
@@ -101,12 +101,20 @@ async fn chat_completion(
         .await
         .context("Failed to parse chat completions response")?;
 
-    parsed
+    let content = parsed
         .choices
         .into_iter()
         .next()
         .map(|c| c.message.content)
-        .ok_or_else(|| anyhow::anyhow!("Empty response from llama.cpp"))
+        .ok_or_else(|| anyhow::anyhow!("Empty choices array in response"))?;
+
+    eprintln!("{}", format!("  ← received {} chars from model", content.len()).dimmed());
+
+    if content.trim().is_empty() {
+        anyhow::bail!("Model returned empty content — check max_tokens / context window settings");
+    }
+
+    Ok(content)
 }
 
 async fn process_in_chunks(
